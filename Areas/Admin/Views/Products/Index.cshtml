@@ -15,6 +15,7 @@
         <tr>
             <th>Name</th>
             <th>Price</th>
+            <th>Discount</th>
             <th>Category</th>
             <th>Image</th>
             <th></th>
@@ -29,6 +30,9 @@
                 </td>
                 <td>
                     @item.Price.ToString("C2")
+                </td>
+                <td>
+                    @String.Format("{0:00}%",item.Discount.ToString())
                 </td>
                 <td>
                     @item.Category.Name

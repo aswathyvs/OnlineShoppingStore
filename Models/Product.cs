@@ -22,7 +22,6 @@ namespace OnlineShoppingStore.Models
         public decimal Price { get; set; }
 
         [Required(ErrorMessage = "Please enter a value")]
-        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:P2}")]
         [Column(TypeName = "decimal(8, 2)")]
         public decimal Discount { get; set; }
 

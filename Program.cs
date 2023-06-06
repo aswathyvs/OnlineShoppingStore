@@ -1,24 +1,40 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OnlineShoppingStore.Data;
+using OnlineShoppingStore.Data.Repository;
+using OnlineShoppingStore.Infrastructure.Settings.Log;
+using OnlineShoppingStore.Models;
+using System.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DbConnection");
-//builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//    options.UseSqlServer(connectionString));
-builder.Services.AddDbContext<OnlineShoppingStoreContext>(options =>
-    options.UseSqlServer(connectionString));
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+builder.Services.LogConfiguration(builder.Configuration);
 
-//builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-//    .AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+builder.Services.AddDbContext<OnlineShoppingStoreContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration["ConnectionStrings:DbConnection"]);
+});
+
+builder.Services.AddDistributedMemoryCache();
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.IsEssential = true;
+});
+
+builder.Services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<OnlineShoppingStoreContext>().AddDefaultTokenProviders();
+
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
+app.UseSession();
+
 // Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
@@ -39,8 +55,19 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
+    name: "Areas",
+    pattern: "{area:exists}/{controller=Products}/{action=Index}/{id?}");
+
+app.MapControllerRoute(
+    name: "products",
+    pattern: "/products/{categorySlug?}",
+    defaults: new { controller = "Products", action = "Index" });
+
+app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-app.MapRazorPages();
+
+var context = app.Services.CreateScope().ServiceProvider.GetRequiredService<OnlineShoppingStoreContext>();
+SeedData.SeedDatabase(context);
 
 app.Run();

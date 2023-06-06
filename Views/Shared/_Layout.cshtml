@@ -34,15 +34,45 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+                        @if (User.Identity?.IsAuthenticated ?? false)
+                        {
+                            <li class="nav-item">
+                                <a class="btn btn-primary" asp-area="Admin" asp-controller="Products" asp-action="Index">Products</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-danger margin-left" asp-controller="Account" asp-action="Logout">Hi, @User.Identity.Name, Log out</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="btn btn-success" style="margin-left:10px;" asp-controller="Account" asp-action="Create">Register</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-success" style="margin-left:10px;" asp-controller="Account" asp-action="Login">Log in</a>
+                            </li>
+                        }
                     </ul>
-                    <partial name="_LoginPartial" />
                 </div>
             </div>
         </nav>
     </header>
     <div class="container">
         <main role="main" class="pb-3">
-            @RenderBody()
+            <div class="row">
+                <div class="col-3">
+                    @await (Component.InvokeAsync<OnlineShoppingStore.Infrastructure.Components.CategoriesViewComponent>())
+
+                    <div class="bg-success mt-3 p-3 text-white">
+                        @await (Component.InvokeAsync<OnlineShoppingStore.Infrastructure.Components.SmallCartViewComponent>())
+                    </div>
+                </div>
+                <div class="col">
+                    <partial name="_NotificationPartial" />
+                    @RenderBody()
+                </div>
+            </div>
+
         </main>
     </div>
 

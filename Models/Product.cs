@@ -21,7 +21,12 @@ namespace OnlineShoppingStore.Models
         [Column(TypeName = "decimal(8, 2)")]
         public decimal Price { get; set; }
 
-        [Required, Range(1, int.MaxValue, ErrorMessage = "You must choose a category")]
+        [Required(ErrorMessage = "Please enter a value")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:P2}")]
+        [Column(TypeName = "decimal(8, 2)")]
+        public decimal Discount { get; set; }
+
+        [Required(ErrorMessage = "You must choose a category")]
         public Guid CategoryId { get; set; }
 
         public Category Category { get; set; }
